@@ -1,0 +1,28 @@
+# Virtual environment
+matchmind-env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Project data
+data/raw/
+data/processed/
+
+# Logs
+*.log
+
