@@ -10,7 +10,7 @@ from src.data.statsbomb_loader import load_events
 from src.embeddings import SentenceEmbedder
 from src.retrieval import SemanticSearcher
 from src.text.event_formatter import build_event_documents
-
+from src.pipeline import RetrievalPipeline
 
 MODEL_NAME = (
     "sentence-transformers/all-MiniLM-L6-v2"
@@ -105,3 +105,55 @@ def test_world_cup_final_retrieval_pipeline() -> None:
             len(results) - 1
         )
     )
+    
+def test_pipeline_requires_index_before_search() -> None:
+    """Searching before indexing should raise a clear error."""
+
+    pipeline = RetrievalPipeline()
+
+    with pytest.raises(
+        RuntimeError,
+        match="No match has been indexed",
+    ):
+        pipeline.search(
+            "Mbappé takes a shot"
+        )
+
+
+@pytest.mark.integration
+def test_high_level_retrieval_pipeline() -> None:
+    """The high-level pipeline should index and search a real match."""
+
+    pipeline = RetrievalPipeline()
+
+    summary = pipeline.index_match(
+        MATCH_ID,
+        show_progress_bar=False,
+    )
+
+    assert summary["indexed"] is True
+    assert summary["match_id"] == MATCH_ID
+    assert summary["events"] == 4407
+    assert summary["event_documents"] == 3252
+    assert summary["chunks"] == 428
+    assert summary["embedding_dimension"] == 384
+
+    results = pipeline.search(
+        (
+            "A France attack where "
+            "Kylian Mbappé takes a shot"
+        ),
+        top_k=5,
+        unique_possessions=True,
+    )
+
+    assert len(results) == 5
+
+    possession_ids = [
+        result["chunk"]["possession_id"]
+        for result in results
+    ]
+
+    assert len(
+        set(possession_ids)
+    ) == 5
