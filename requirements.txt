@@ -20,3 +20,5 @@ sentence-transformers==3.4.1
 jupyterlab==4.3.5
 ipykernel==6.29.5
 nbconvert==7.16.6
+
+pytest==9.1.1
